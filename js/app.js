@@ -1,13 +1,23 @@
+
+//https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
+function randomIntFromInterval(min,max){
+        return Math.floor(Math.random()*(max-min+1)+min);
+    }
+//retorna um valor de um array
+function randomIntFromArray(array){
+        return array[randomIntFromInterval(0,array.length-1)];
+    }
 // Inimigos que nosso jogador deve evitar
-var Enemy = function(y) {
+var Enemy = function() {
     // As variáveis aplicadas a nossas instâncias entram aqui.
-    // Fornecemos uma a você para que possa começcar.
-    this.x = -120;
-    this.y = y;
+    // Fornecemos uma a você para que possa começar.
+    this.x = randomIntFromArray([250,300,400]);
+    this.y = randomIntFromInterval([60,140,225]);;
     // A imagem/sprite de nossos inimigos, isso usa um
     // ajudante que é fornecido para carregar imagens
     // com facilidade.
     this.sprite = 'images/enemy-bug.png';
+    this.speed = randomIntFromArray([250,300,400]);
 };
 
 // Atualize a posição do inimigo, método exigido pelo jogo
@@ -16,10 +26,23 @@ Enemy.prototype.update = function(dt) {
     // Você deve multiplicar qualquer movimento pelo parâmetro
     // dt, o que garantirá que o jogo rode na mesma velocidade
     // em qualquer computador.
-    this.x = this.x+120*dt;
-    if(this.x >550)
-        this.x=0;
+    this.x = this.x+this.speed*dt;
+    if(this.x > 550)
+    {
+        this.x = -randomIntFromInterval(300,600);
+        this.y = randomIntFromArray([60,140,225]);
+        this.speed = randomIntFromArray([250,300,400]);
+    }
 
+    this.collision();
+};
+
+Enemy.prototype.collision = function(){
+
+    if (player.y + 131 >= this.y + 90 && player.y + 74 <= this.y + 135 && 
+        player.x + 25 <= this.x + 88 && player.x + 76 >= this.x + 11) {
+        player = new Player();
+    }
 };
 
 // Desenhe o inimigo na tela, método exigido pelo jogo
@@ -37,42 +60,47 @@ class Player {
         this.y = 380;
     }
     update() {
-        let stepY = 83;
-        let stepX = 100;
-        console.log(this.y);
-        if((this.x === 0 && this.key === "left")|| (this.x === 400 && this.key === "right")){
-            this.key=null;
-            return;
-        }
-        if(this.y+stepY > 380 && this.key === "down"){
-            this.key=null;
-            return;
-        }
-        if(this.y === -35) {
-            this.y = 380;
-            this.x = 200;
-            this.key = null;
-        }
-        if(this.key === "left") {
-            this.x -= stepX;
-        }
-        else if(this.key === "up") {
-            this.y -= stepY;
-        }
-        else if(this.key === "right") {
-            this.x += stepX;
-        }
-        //down
-        else if(this.key === "down") {
-            this.y +=stepY;
-        }
-        this.key=null;
+        
     }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
     handleInput(key){
-        this.key=key;
+        let stepY = 83;
+        let stepX = 100;
+
+        if((this.x === 0 && key === "left")|| (this.x === 400 && key === "right")){
+            key=null;
+            return;
+        }
+        if(this.y+stepY > 380 && key === "down"){
+            key=null;
+            return;
+        }
+        
+        if(key === "left") {
+            this.x -= stepX;
+        }
+        else if(key === "up") {
+            if(this.y < 50) {
+                this.render();
+                let that = this;
+                setTimeout(function(){
+                that.y = 380;
+                that.x = 200;
+                key = null;
+                },250);
+            }
+            this.y -= stepY;
+        }
+        else if(key === "right") {
+            this.x += stepX;
+        }
+        //down
+        else if(key === "down") {
+            this.y +=stepY;
+        }
+        key=null;
 
     }
 
@@ -81,9 +109,8 @@ class Player {
 // Represente seus objetos como instâncias.
 // Coloque todos os objetos inimgos numa array allEnemies
 // Coloque o objeto do jogador numa variável chamada jogador.
-var allEnemies = [new Enemy(60),new Enemy(140),new Enemy(220)];
+var allEnemies = [];
 var player = new Player();
-
 
 
 // Isto reconhece cliques em teclas e envia as chaves para seu
@@ -97,4 +124,18 @@ document.addEventListener('keyup', function(e) {
     };
 
     player.handleInput(allowedKeys[e.keyCode]);
+});
+
+function newGame(){
+    allEnemies.length=0;
+    for(let i=0; i < 3; i++){
+        
+        allEnemies.push(new Enemy());
+
+    }
+
+}
+
+document.addEventListener("DOMContentLoaded", function(event) { 
+  newGame();
 });
