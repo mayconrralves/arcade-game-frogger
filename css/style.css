@@ -1,3 +1,9 @@
 body {
     text-align: center;
 }
+
+header p {
+	font-size: 2em;
+	padding: 0px;
+	margin-bottom: 0px;
+}

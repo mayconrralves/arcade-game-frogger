@@ -1,12 +1,24 @@
 
+//número de vitórias
+var numberWins = 0;
 //https://stackoverflow.com/questions/4959975/generate-random-number-between-two-numbers-in-javascript
-function randomIntFromInterval(min,max){
+function randomIntFromInterval(min,max) {
         return Math.floor(Math.random()*(max-min+1)+min);
     }
-//retorna um valor de um array
-function randomIntFromArray(array){
+//retorna um valor de um array aleatoriamente
+function randomIntFromArray(array) {
         return array[randomIntFromInterval(0,array.length-1)];
     }
+//atualiza o header do jogo, onde conta o número de vitórias
+function renderVictory() {
+    let element = document.getElementById("win");
+    element.innerHTML = "";
+    let win = document.createElement("p");
+    let node = document.createTextNode("Vitórias: "+(++numberWins));
+    win.appendChild(node);
+    
+    element.appendChild(win);
+}
 // Inimigos que nosso jogador deve evitar
 var Enemy = function() {
     // As variáveis aplicadas a nossas instâncias entram aqui.
@@ -17,9 +29,8 @@ var Enemy = function() {
     // ajudante que é fornecido para carregar imagens
     // com facilidade.
     this.sprite = 'images/enemy-bug.png';
-    this.speed = randomIntFromArray([250,300,400]);
+    this.speed = randomIntFromArray([100, 150,200,250,300,400]);
 };
-
 // Atualize a posição do inimigo, método exigido pelo jogo
 // Parâmetro: dt, um delta de tempo entre ticks
 Enemy.prototype.update = function(dt) {
@@ -33,11 +44,10 @@ Enemy.prototype.update = function(dt) {
         this.y = randomIntFromArray([60,140,225]);
         this.speed = randomIntFromArray([250,300,400]);
     }
-
     this.collision();
 };
 
-Enemy.prototype.collision = function(){
+Enemy.prototype.collision = function() {
 
     if (player.y + 131 >= this.y + 90 && player.y + 74 <= this.y + 135 && 
         player.x + 25 <= this.x + 88 && player.x + 76 >= this.x + 11) {
@@ -60,11 +70,11 @@ class Player {
         this.y = 380;
     }
     update() {
-        
-    }
+       }
     render() {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
+    //função que captura e direciona o player
     handleInput(key){
         let stepY = 83;
         let stepX = 100;
@@ -77,19 +87,20 @@ class Player {
             key=null;
             return;
         }
-        
         if(key === "left") {
             this.x -= stepX;
         }
         else if(key === "up") {
             if(this.y < 50) {
                 this.render();
-                let that = this;
-                setTimeout(function(){
-                that.y = 380;
-                that.x = 200;
+                renderVictory();
+                //paralisa a tela por alguns milisegundos
+                setTimeout(() => {
+                this.y = 380;
+                this.x = 200;
                 key = null;
-                },250);
+                return;
+                },200);
             }
             this.y -= stepY;
         }
@@ -125,13 +136,11 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
-
-function newGame(){
+//adiciona ´inimigos
+function newGame() {
     allEnemies.length=0;
-    for(let i=0; i < 3; i++){
-        
+    for(let i=0; i < 7; i++) {
         allEnemies.push(new Enemy());
-
     }
 
 }
